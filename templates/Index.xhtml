@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!DOCTYPE html>
+<html
+ xmlns="http://www.w3.org/1999/xhtml"
+ xmlns:tal="http://xml.adacore.com/namespaces/tal"
+ lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>{{title}} | My Ada Blog</title>
+    <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="index.html" class="logo">Ada Blog</a>
+            <div class="links">
+                <a href="about.html">About Me</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <article>
+            <h1>{{title}}</h1>
+            <div class="metadata">Date: {{date}}</div>
+            <hr/>
+            <section class='content' tal:content="content"/>
+        </article>
+    </main>
+
+    <footer>
+        <p>Max Reznik © 2026 — Formatted by Vyasa, my static site generator in Ada</p>
+    </footer>
+</body>
+</html>
