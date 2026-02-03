@@ -1,0 +1,49 @@
+:root {
+    --bg: #ffffff;
+    --text: #222222;
+    --accent: #0070f3;
+    --code-bg: #f4f4f4;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #121212;
+        --text: #e0e0e0;
+        --accent: #3291ff;
+        --code-bg: #1e1e1e;
+    }
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6;
+    color: var(--text);
+    background-color: var(--bg);
+    max-width: 750px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+header nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+}
+
+.logo { font-weight: bold; font-size: 1.2rem; text-decoration: none; color: var(--accent); }
+
+h1 { line-height: 1.2; }
+
+.metadata { font-size: 0.9rem; color: #888; margin-bottom: 1rem; }
+
+pre {
+    background: var(--code-bg);
+    padding: 1rem;
+    overflow-x: auto;
+    border-radius: 5px;
+}
+
+code { font-family: 'Fira Code', monospace; font-size: 0.9rem; }
+
+footer { margin-top: 5rem; font-size: 0.8rem; text-align: center; opacity: 0.6; }
