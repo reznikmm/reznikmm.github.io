@@ -44,6 +44,52 @@ pre {
     border-radius: 5px;
 }
 
-code { font-family: 'Fira Code', monospace; font-size: 0.9rem; }
+/*code { font-family: 'Fira Code', monospace; font-size: 0.9rem; }*/
+/* Inline code — для команд або назв типів у тексті */
+code:not(pre code) {
+    background-color: var(--code-bg);
+    color: #e83e8c; /* Приємний колір для виділення, або використай var(--accent) */
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-size: 85%;
+    font-family: 'Fira Code', 'Courier New', monospace;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+@media (prefers-color-scheme: dark) {
+    code:not(pre code) {
+        color: #ff79c6; /* Світліший відтінок для темної теми */
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* Blockquotes — для цитат або важливих приміток */
+blockquote {
+    margin: 2rem 0;
+    padding: 0.8rem 1.5rem;
+    border-left: 4px solid var(--accent);
+    background-color: var(--code-bg);
+    border-radius: 0 8px 8px 0;
+    font-style: italic;
+    opacity: 0.9;
+}
+
+blockquote p {
+    margin: 0.5rem 0;
+    line-height: 1.5;
+}
+
+/* Додамо іконку "цитати" через pseudo-element (опціонально) */
+blockquote::before {
+    content: "“";
+    font-family: serif;
+    font-size: 3rem;
+    color: var(--accent);
+    opacity: 0.2;
+    position: absolute;
+    margin-left: -2.5rem;
+    margin-top: -1rem;
+}
+
 
 footer { margin-top: 5rem; font-size: 0.8rem; text-align: center; opacity: 0.6; }
