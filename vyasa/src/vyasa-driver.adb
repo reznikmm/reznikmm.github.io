@@ -25,6 +25,7 @@ with Vyasa.Emitters;
 with Vyasa.Templates.Index;
 
 procedure Vyasa.Driver is
+
    Template : constant VSS.Command_Line.Value_Option :=
      (Short_Name  => "i",
       Long_Name   => "input",
@@ -37,13 +38,47 @@ procedure Vyasa.Driver is
       Description => "Output HTML file name",
       Value_Name  => "file");
 
+   function Trim
+     (Text : VSS.Strings.Virtual_String)
+        return VSS.Strings.Virtual_String is
+          (Text.Split (' ', False).Join (" "));
+
    function To_String
      (List : Markdown.Inlines.Inline_Vector)
         return VSS.Strings.Virtual_String;
 
    function Get_Title (Document : Markdown.Documents.Document)
      return VSS.Strings.Virtual_String is
-       (To_String (Document (1).To_ATX_Heading.Text));
+       (Trim (To_String (Document (1).To_ATX_Heading.Text)));
+
+   type Front_Matter is record
+      Date : VSS.Strings.Virtual_String;
+   end record;
+
+   procedure Read_Front_Matter
+     (Lines : in  out VSS.String_Vectors.Virtual_String_Vector;
+      Value : out Front_Matter);
+
+   -----------------------
+   -- Read_Front_Matter --
+   -----------------------
+
+   procedure Read_Front_Matter
+     (Lines : in  out VSS.String_Vectors.Virtual_String_Vector;
+      Value : out Front_Matter)
+   is
+      Line : VSS.Strings.Virtual_String;
+   begin
+      while Lines.Length > 0 loop
+         Line := Lines.First_Element;
+         Lines.Delete_First;
+         exit when Line.Starts_With ("---");
+
+         if Line.Starts_With ("date:") then
+            Value.Date := Trim (Line.Split (':')(2));
+         end if;
+      end loop;
+   end Read_Front_Matter;
 
    ---------------
    -- To_String --
@@ -79,6 +114,7 @@ procedure Vyasa.Driver is
    Output : aliased VSS.Text_Streams.File_Output.File_Output_Text_Stream;
 
    Parser : Markdown.Parsers.Markdown_Parser;
+   Front  : Front_Matter;
 begin
    VSS.Command_Line.Add_Option (Output_File);
    VSS.Command_Line.Add_Option (Template);
@@ -103,9 +139,11 @@ begin
       end loop;
 
       declare
-         Lines : constant VSS.String_Vectors.Virtual_String_Vector :=
+         Lines : VSS.String_Vectors.Virtual_String_Vector :=
            Text.Split_Lines;
       begin
+         Read_Front_Matter (Lines, Front);
+
          for Line of Lines loop
             Parser.Parse_Line (Line);
          end loop;
@@ -132,6 +170,10 @@ begin
         new VSS.XML.Templates.Proxies.Strings.Virtual_String_Proxy'
           (Text => Get_Title (Document));
 
+      Date_Proxy : constant VSS.XML.Templates.Proxies.Proxy_Access :=
+        new VSS.XML.Templates.Proxies.Strings.Virtual_String_Proxy'
+          (Text => Front.Date);
+
    begin
       Vyasa.Emitters.Emit_Blocks (Sink, Document, False);
 
@@ -139,6 +181,7 @@ begin
         ("content", VSS.XML.Templates.Proxies.Proxy_Access (Content));
 
       Filter.Bind ("title", Title_Proxy);
+      Filter.Bind ("date", Date_Proxy);
 
       Vyasa.Templates.Index (Filter, Ok);
    end;

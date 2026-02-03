@@ -96,3 +96,20 @@ footer { margin-top: 5rem; font-size: 0.8rem; text-align: center; opacity: 0.6; 
 
 /* Hide first h1 in content since it's already displayed in template */
 .content > h1:first-child { display: none; }
+
+.post-date {
+    font-family: 'Fira Code', monospace; /* Моноширинний шрифт підкреслює технічність */
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    background: var(--code-bg);
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    display: inline-block;
+}
+
+.post-date::before {
+    content: "📅 ";
+    filter: grayscale(1);
+    margin-right: 5px;
+}

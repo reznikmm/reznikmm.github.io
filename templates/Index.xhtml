@@ -23,7 +23,8 @@
     <main>
         <article>
             <h1 tal:content="title"/>
-            <div class="metadata">Date: {{date}}</div>
+            <div class="metadata">Date:
+              <time datetime="2026-01-01" class="post-date" tal:content="date" tal:attributes="datetime date"/></div>
             <hr/>
             <section class='content' tal:content="content"/>
         </article>

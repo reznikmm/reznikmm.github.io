@@ -151,7 +151,19 @@ begin
    Attr.Insert (+"", "class", "metadata");
    CH.Start_Element (+"http://www.w3.org/1999/xhtml", "div", Attr, Ok);
 end;
-CH.Characters ("Date: {{date}}", Ok);
+CH.Characters ("Date:", Ok);
+CH.Characters (New_Line, Ok);
+CH.Characters ("              ", Ok);
+declare
+   Attr : VSS.XML.Attributes.Containers.Attributes;
+begin
+   Attr.Insert (+"", "datetime", "2026-01-01");
+   Attr.Insert (+"", "class", "post-date");
+   Attr.Insert (+"http://xml.adacore.com/namespaces/tal", "content", "date");
+   Attr.Insert (+"http://xml.adacore.com/namespaces/tal", "attributes", "datetime date");
+   CH.Start_Element (+"http://www.w3.org/1999/xhtml", "time", Attr, Ok);
+end;
+CH.End_Element (+"http://www.w3.org/1999/xhtml", "time", Ok);
 CH.End_Element (+"http://www.w3.org/1999/xhtml", "div", Ok);
 CH.Characters (New_Line, Ok);
 CH.Characters ("            ", Ok);
