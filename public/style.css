@@ -93,3 +93,6 @@ blockquote::before {
 
 
 footer { margin-top: 5rem; font-size: 0.8rem; text-align: center; opacity: 0.6; }
+
+/* Hide first h1 in content since it's already displayed in template */
+.content > h1:first-child { display: none; }

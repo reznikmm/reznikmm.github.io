@@ -10,5 +10,8 @@ public/%.html: posts/%.md $(VYASA)
 	@mkdir -p public
 	$(VYASA) -i $< -o $@
 
-$(VYASA):
+$(VYASA): vyasa/generated/vyasa-templates-index.adb
 	alr -C vyasa build
+
+vyasa/generated/vyasa-templates-index.adb: templates/Index.xhtml
+	python vyasa/read_xml.py $< Vyasa.Templates.Index > $@

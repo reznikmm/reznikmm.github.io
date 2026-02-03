@@ -47,9 +47,9 @@ CH.Characters ("    ", Ok);
 declare
    Attr : VSS.XML.Attributes.Containers.Attributes;
 begin
+   Attr.Insert (+"http://xml.adacore.com/namespaces/tal", "content", "title");
    CH.Start_Element (+"http://www.w3.org/1999/xhtml", "title", Attr, Ok);
 end;
-CH.Characters ("{{title}} | My Ada Blog", Ok);
 CH.End_Element (+"http://www.w3.org/1999/xhtml", "title", Ok);
 CH.Characters (New_Line, Ok);
 CH.Characters ("    ", Ok);
@@ -90,7 +90,7 @@ begin
    Attr.Insert (+"", "class", "logo");
    CH.Start_Element (+"http://www.w3.org/1999/xhtml", "a", Attr, Ok);
 end;
-CH.Characters ("Ada_Blog", Ok);
+CH.Characters ("Ada Blog", Ok);
 CH.End_Element (+"http://www.w3.org/1999/xhtml", "a", Ok);
 CH.Characters (New_Line, Ok);
 CH.Characters ("            ", Ok);
@@ -139,9 +139,9 @@ CH.Characters ("            ", Ok);
 declare
    Attr : VSS.XML.Attributes.Containers.Attributes;
 begin
+   Attr.Insert (+"http://xml.adacore.com/namespaces/tal", "content", "title");
    CH.Start_Element (+"http://www.w3.org/1999/xhtml", "h1", Attr, Ok);
 end;
-CH.Characters ("{{title}}", Ok);
 CH.End_Element (+"http://www.w3.org/1999/xhtml", "h1", Ok);
 CH.Characters (New_Line, Ok);
 CH.Characters ("            ", Ok);
@@ -192,7 +192,7 @@ declare
 begin
    CH.Start_Element (+"http://www.w3.org/1999/xhtml", "p", Attr, Ok);
 end;
-CH.Characters ("Max Reznik © 2026 — Formatted with Vyasa, Static site generator in Ada", Ok);
+CH.Characters ("Max Reznik © 2026 — Formatted by Vyasa, my static site generator in Ada", Ok);
 CH.End_Element (+"http://www.w3.org/1999/xhtml", "p", Ok);
 CH.Characters (New_Line, Ok);
 CH.Characters ("    ", Ok);

@@ -3,7 +3,9 @@
 --  SPDX-License-Identifier: MIT
 ----------------------------------------------------------------
 
+with Markdown.Blocks.ATX_Headings;
 with Markdown.Documents;
+with Markdown.Inlines;
 with Markdown.Parsers;
 
 with VSS.Characters;
@@ -16,6 +18,7 @@ with VSS.Text_Streams.File_Output;
 with VSS.XML.Dummy_Locators;
 with VSS.XML.Templates.Processors;
 with VSS.XML.Templates.Proxies.Event_Vectors;
+with VSS.XML.Templates.Proxies.Strings;
 
 with Vyasa.Content_Handlers;
 with Vyasa.Emitters;
@@ -33,6 +36,40 @@ procedure Vyasa.Driver is
       Long_Name   => "output-file",
       Description => "Output HTML file name",
       Value_Name  => "file");
+
+   function To_String
+     (List : Markdown.Inlines.Inline_Vector)
+        return VSS.Strings.Virtual_String;
+
+   function Get_Title (Document : Markdown.Documents.Document)
+     return VSS.Strings.Virtual_String is
+       (To_String (Document (1).To_ATX_Heading.Text));
+
+   ---------------
+   -- To_String --
+   ---------------
+
+   function To_String
+     (List : Markdown.Inlines.Inline_Vector)
+        return VSS.Strings.Virtual_String
+   is
+      Result : VSS.Strings.Virtual_String;
+   begin
+      for Item of List loop
+         case Item.Kind is
+            when Markdown.Inlines.Text =>
+               Result.Append (Item.Text);
+            when Markdown.Inlines.Code_Span =>
+               Result.Append (Item.Code_Span);
+            when Markdown.Inlines.Soft_Line_Break
+               | Markdown.Inlines.Hard_Line_Break =>
+               Result.Append (' ');
+            when others =>
+               null;
+         end case;
+      end loop;
+      return Result;
+   end To_String;
 
    Locator : aliased VSS.XML.Dummy_Locators.SAX_Locator;
 
@@ -91,11 +128,17 @@ begin
       Sink : Vyasa.Content_Handlers.SAX_Content_Handler :=
           (Value => Content.Value'Unchecked_Access);
 
+      Title_Proxy : constant VSS.XML.Templates.Proxies.Proxy_Access :=
+        new VSS.XML.Templates.Proxies.Strings.Virtual_String_Proxy'
+          (Text => Get_Title (Document));
+
    begin
       Vyasa.Emitters.Emit_Blocks (Sink, Document, False);
 
       Filter.Bind
         ("content", VSS.XML.Templates.Proxies.Proxy_Access (Content));
+
+      Filter.Bind ("title", Title_Proxy);
 
       Vyasa.Templates.Index (Filter, Ok);
    end;
