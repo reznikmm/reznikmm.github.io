@@ -24,6 +24,9 @@ package body Vyasa.Emitters is
    URI : constant VSS.IRIs.IRI :=
      VSS.IRIs.To_IRI ("http://www.w3.org/1999/xhtml");
 
+   XML : constant VSS.IRIs.IRI :=
+     VSS.IRIs.To_IRI ("http://www.w3.org/XML/1998/namespace");
+
    New_Line : constant VSS.Strings.Virtual_String :=
      1 * VSS.Characters.Virtual_Character'Val (10);
 
@@ -262,6 +265,8 @@ package body Vyasa.Emitters is
 
             Attr : VSS.XML.Attributes.Containers.Attributes;
          begin
+            Attr.Insert (XML, "space", "preserve");
+
             if not Info.Is_Empty then
                Attr.Insert (VSS.IRIs.Empty_IRI, "class", List (1));
             end if;
