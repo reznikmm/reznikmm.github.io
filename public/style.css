@@ -3,6 +3,10 @@
     --text: #222222;
     --accent: #0070f3;
     --code-bg: #f4f4f4;
+
+    --link-color: #0070f3;         /* Класичний синій */
+    --link-visited: #6e40c9;       /* Трохи світліший фіолетовий */
+    --link-hover: #0056b3;         /* Темніший при наведенні */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -11,6 +15,10 @@
         --text: #e0e0e0;
         --accent: #3291ff;
         --code-bg: #1e1e1e;
+
+        --link-color: #58a6ff;        /* Яскравий, світлий блакитний (як на GitHub Dark) */
+        --link-visited: #bc8cff;      /* Світлий бузковий/ліловий */
+        --link-hover: #8ac2ff;        /* Ще світліший при наведенні */
     }
 }
 
@@ -91,7 +99,6 @@ blockquote::before {
     margin-top: -1rem;
 }
 
-
 footer { margin-top: 5rem; font-size: 0.8rem; text-align: center; opacity: 0.6; }
 
 /* Hide first h1 in content since it's already displayed in template */
@@ -112,4 +119,24 @@ footer { margin-top: 5rem; font-size: 0.8rem; text-align: center; opacity: 0.6; 
     content: "📅 ";
     filter: grayscale(1);
     margin-right: 5px;
+}
+
+/* Базові стилі для всіх посилань */
+a {
+    color: var(--link-color);
+    text-decoration: none; /* Прибираємо підкреслення за замовчуванням */
+    transition: color 0.2s ease, text-decoration 0.2s ease;
+    border-bottom: 1px solid transparent; /* Підготовка для ховера */
+}
+
+/* Стиль для вже відвіданих посилань */
+a:visited {
+    color: var(--link-visited);
+}
+
+/* Стиль при наведенні миші та фокусі клавіатурою */
+a:hover, a:focus {
+    color: var(--link-hover);
+    border-bottom-color: var(--link-hover); /* Додаємо елегантне підкреслення при наведенні */
+    outline: none; /* Прибираємо стандартну обводку браузера */
 }
