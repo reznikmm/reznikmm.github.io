@@ -140,3 +140,39 @@ a:hover, a:focus {
     border-bottom-color: var(--link-hover); /* Додаємо елегантне підкреслення при наведенні */
     outline: none; /* Прибираємо стандартну обводку браузера */
 }
+
+/* Налаштування блоку коду */
+pre {
+    background-color: var(--code-bg);
+    padding: 1rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    line-height: 1.5;
+}
+
+/* Базовий колір тексту в коді */
+code[class*="language-"] {
+    /*color: var(--text);*/
+    text-shadow: none;
+}
+
+/* Класи підсвітки */
+.token.keyword { color: #0000ff; font-weight: bold; }   /* procedure, begin, is */
+.token.id { color: #795e26; }                     /* Назви процедур/функцій */
+.token.comment { color: #008000; font-style: italic; }  /* -- comments */
+.token.string, .token.char { color: #a31515; }                       /* "Strings" */
+.token.number { color: #098658; }                       /* 123, 16#FF# */
+pre code { color: #a52a2a; }                     /* :=, =>, +, & */
+
+/* Темна тема */
+@media (prefers-color-scheme: dark) {
+    pre { border-color: rgba(255, 255, 255, 0.1); }
+
+    .token.keyword { color: #569cd6; }   /* Світло-синій */
+    .token.id { color: #dcdcaa; }  /* Жовтуватий */
+    .token.comment { color: #6a9955; }   /* М'який зелений */
+    .token.string, .token.char { color: #ce9178; }    /* Теплий помаранчевий */
+    .token.number { color: #b5cea8; }    /* Салатовий */
+    pre code { color: #d4d4d4; }  /* Світло-сірий */
+}
