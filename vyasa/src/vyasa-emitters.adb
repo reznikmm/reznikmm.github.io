@@ -39,18 +39,60 @@ package body Vyasa.Emitters is
      (Markdown.Inlines.Start_Emphasis .. Markdown.Inlines.End_Strong)
        of VSS.Strings.Virtual_String := ["em", "em", "strong", "strong"];
 
+   package Dummy_Highlighters is
+      type Highlighter is new Vyasa.Highlighters.Highlighter with null record;
+
+      overriding procedure Highlight
+        (Self   : Highlighter;
+         Info   : VSS.Strings.Virtual_String;
+         Lines  : VSS.String_Vectors.Virtual_String_Vector;
+         Action : not null access procedure
+           (Text     : VSS.Strings.Virtual_String;
+            Style    : VSS.Strings.Virtual_String;
+            New_Line : Boolean));
+
+      Dummy : aliased Highlighter;
+   end Dummy_Highlighters;
+
    procedure Emit_Annotated_Text
      (Writer : in out VSS.XML.Content_Handlers.SAX_Content_Handler'Class;
       Text   : Markdown.Inlines.Inline_Vector);
 
    procedure Emit_Block
-     (Writer   : in out VSS.XML.Content_Handlers.SAX_Content_Handler'Class;
+     (Self     : Emitter'Class;
+      Writer   : in out VSS.XML.Content_Handlers.SAX_Content_Handler'Class;
       Block    : Markdown.Blocks.Block;
       Is_Tight : Boolean);
 
    procedure Emit_List
-     (Writer : in out VSS.XML.Content_Handlers.SAX_Content_Handler'Class;
+     (Self   : Emitter'Class;
+      Writer : in out VSS.XML.Content_Handlers.SAX_Content_Handler'Class;
       List   : Markdown.Blocks.Lists.List);
+
+   package body Dummy_Highlighters is
+
+      ---------------
+      -- Highlight --
+      ---------------
+
+      overriding procedure Highlight
+        (Self   : Highlighter;
+         Info   : VSS.Strings.Virtual_String;
+         Lines  : VSS.String_Vectors.Virtual_String_Vector;
+         Action : not null access procedure
+           (Text     : VSS.Strings.Virtual_String;
+            Style    : VSS.Strings.Virtual_String;
+            New_Line : Boolean)) is
+      begin
+         for Index in 1 .. Lines.Last_Index loop
+            Action
+              (Lines (Index),
+               VSS.Strings.Empty_Virtual_String,
+               Index /= Lines.Last_Index);
+         end loop;
+      end Highlight;
+
+   end Dummy_Highlighters;
 
    procedure Emit_Annotated_Text
      (Writer : in out VSS.XML.Content_Handlers.SAX_Content_Handler'Class;
@@ -218,11 +260,45 @@ package body Vyasa.Emitters is
    ----------------
 
    procedure Emit_Block
-     (Writer   : in out VSS.XML.Content_Handlers.SAX_Content_Handler'Class;
+     (Self     : Emitter'Class;
+      Writer   : in out VSS.XML.Content_Handlers.SAX_Content_Handler'Class;
       Block    : Markdown.Blocks.Block;
       Is_Tight : Boolean)
    is
-      Ok      : Boolean := True;
+      procedure Action
+        (Text     : VSS.Strings.Virtual_String;
+         Style    : VSS.Strings.Virtual_String;
+         New_Line : Boolean);
+
+      Ok : Boolean := True;
+
+      procedure Action
+        (Text     : VSS.Strings.Virtual_String;
+         Style    : VSS.Strings.Virtual_String;
+         New_Line : Boolean)
+      is
+      begin
+         if Text.Is_Empty then
+            null;
+         elsif Style.Is_Empty then
+            Writer.Characters (Text, Ok);
+         else
+            declare
+               Attr  : VSS.XML.Attributes.Containers.Attributes;
+               Class : constant VSS.Strings.Virtual_String :=
+                 "token " & Style;
+            begin
+               Attr.Insert (URI, "class", Class);
+               Writer.Start_Element (URI, "span", Attr, Ok);
+               Writer.Characters (Text, Ok);
+               Writer.End_Element (URI, "span", Ok);
+            end;
+         end if;
+
+         if New_Line then
+            Writer.Characters (Vyasa.Emitters.New_Line, Ok);
+         end if;
+      end Action;
    begin
 
       if Block.Is_Paragraph then
@@ -252,7 +328,7 @@ package body Vyasa.Emitters is
 
       elsif Block.Is_Quote then
          Writer.Start_Element (URI, "blockquote", Nil, Ok);
-         Emit_Blocks (Writer, Block.To_Quote, Is_Tight => False);
+         Emit_Blocks (Self, Writer, Block.To_Quote, Is_Tight => False);
          Writer.End_Element (URI, "blockquote", Ok);
 
       elsif Block.Is_Fenced_Code_Block then
@@ -264,6 +340,10 @@ package body Vyasa.Emitters is
               Info.Split (' ');
 
             Attr : VSS.XML.Attributes.Containers.Attributes;
+            HL   : constant not null Highlighter_Access :=
+              (if List.Length > 0 and then Self.Map.Contains (List (1))
+               then Self.Map (List (1))
+               else Dummy_Highlighters.Dummy'Access);
          begin
             Attr.Insert (XML, "space", "preserve");
 
@@ -274,10 +354,8 @@ package body Vyasa.Emitters is
             Writer.Start_Element (URI, "pre", Nil, Ok);
             Writer.Start_Element (URI, "code", Attr, Ok);
 
-            for Line of Block.To_Fenced_Code_Block.Text loop
-               Writer.Characters (Line, Ok);
-               Writer.Characters (New_Line, Ok);
-            end loop;
+            HL.Highlight
+              (Info, Block.To_Fenced_Code_Block.Text, Action'Access);
 
             Writer.End_Element (URI, "code", Ok);
             Writer.End_Element (URI, "pre", Ok);
@@ -296,7 +374,7 @@ package body Vyasa.Emitters is
          Writer.End_Element (URI, "pre", Ok);
 
       elsif Block.Is_List then
-         Emit_List (Writer, Block.To_List);
+         Emit_List (Self, Writer, Block.To_List);
 
       --  elsif Block.Is_HTML_Block then
          --  Writer.Raw_HTML (Block.To_HTML_Block.Text);
@@ -314,17 +392,19 @@ package body Vyasa.Emitters is
    -----------------
 
    procedure Emit_Blocks
-     (Writer   : in out VSS.XML.Content_Handlers.SAX_Content_Handler'Class;
+     (Self     : Emitter'Class;
+      Writer   : in out VSS.XML.Content_Handlers.SAX_Content_Handler'Class;
       List     : Markdown.Block_Containers.Block_Container'Class;
       Is_Tight : Boolean) is
    begin
       for Block of List loop
-         Emit_Block (Writer, Block, Is_Tight);
+         Emit_Block (Self, Writer, Block, Is_Tight);
       end loop;
    end Emit_Blocks;
 
    procedure Emit_List
-     (Writer : in out VSS.XML.Content_Handlers.SAX_Content_Handler'Class;
+     (Self   : Emitter'Class;
+      Writer : in out VSS.XML.Content_Handlers.SAX_Content_Handler'Class;
       List   : Markdown.Blocks.Lists.List)
    is
       Tag : constant VSS.Strings.Virtual_String :=
@@ -351,11 +431,23 @@ package body Vyasa.Emitters is
 
       for Item of List loop
          Writer.Start_Element (URI, "li", Nil, Ok);
-         Emit_Blocks (Writer, Item, Is_Tight => not List.Is_Loose);
+         Emit_Blocks (Self, Writer, Item, Is_Tight => not List.Is_Loose);
          Writer.End_Element (URI, "li", Ok);
       end loop;
 
       Writer.End_Element (URI, Tag, Ok);
    end Emit_List;
+
+   --------------------------
+   -- Register_Highlighter --
+   --------------------------
+
+   procedure Register_Highlighter
+     (Self  : in out Emitter'Class;
+      Name  : VSS.Strings.Virtual_String;
+      Value : not null Highlighter_Access) is
+   begin
+      Self.Map.Insert (Name, Value);
+   end Register_Highlighter;
 
 end Vyasa.Emitters;

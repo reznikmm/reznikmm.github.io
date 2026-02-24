@@ -140,3 +140,41 @@ a:hover, a:focus {
     border-bottom-color: var(--link-hover); /* Додаємо елегантне підкреслення при наведенні */
     outline: none; /* Прибираємо стандартну обводку браузера */
 }
+
+/* Налаштування блоку коду */
+pre {
+    background-color: var(--code-bg);
+    padding: 1rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    line-height: 1.5;
+}
+
+/* Базовий колір тексту в коді */
+code[class*="language-"] {
+    /*color: var(--text);*/
+    text-shadow: none;
+}
+
+/* Класи підсвітки */
+.token.keyword { color: #0000ff; }
+.token.id { color: #000000; }
+.token.comment { color: #008000; font-style: italic; }
+.token.string { color: #a31515; }
+.token.char { color: #800000; }
+.token.number { color: #098658; }
+pre code { color: #098658; }
+
+/* Темна тема */
+@media (prefers-color-scheme: dark) {
+    pre { border-color: rgba(255, 255, 255, 0.1); }
+
+    .token.keyword { color: #569CD6; }
+    .token.id { color: #d4d4d4; }
+    .token.comment { color: #6A9955; }
+    .token.string { color: #ce9178; }
+    .token.char { color: #d7ba7d; }
+    .token.number { color: #b5cea8; }
+    pre code { color: #b5cea8; }
+}

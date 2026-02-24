@@ -22,6 +22,7 @@ with VSS.XML.Templates.Proxies.Strings;
 
 with Vyasa.Content_Handlers;
 with Vyasa.Emitters;
+with Vyasa.Highlighters.Ada;
 with Vyasa.Templates.Index;
 
 procedure Vyasa.Driver is
@@ -174,8 +175,12 @@ begin
         new VSS.XML.Templates.Proxies.Strings.Virtual_String_Proxy'
           (Text => Front.Date);
 
+      Emitter : Vyasa.Emitters.Emitter;
+      Ada_HL  : aliased Vyasa.Highlighters.Ada.Ada_Highlighter;
    begin
-      Vyasa.Emitters.Emit_Blocks (Sink, Document, False);
+      Ada_HL.Initialize;
+      Emitter.Register_Highlighter ("ada", Ada_HL'Unchecked_Access);
+      Emitter.Emit_Blocks (Sink, Document, False);
 
       Filter.Bind
         ("content", VSS.XML.Templates.Proxies.Proxy_Access (Content));
