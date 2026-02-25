@@ -161,7 +161,8 @@ code[class*="language-"] {
 .token.keyword { color: #0000ff; }
 .token.id { color: #000000; }
 .token.comment { color: #008000; font-style: italic; }
-.token.string, .token.char { color: #a31515; }
+.token.string { color: #a31515; }
+.token.char { color: #800000; }
 .token.number { color: #098658; }
 pre code { color: #098658; }
 
@@ -172,7 +173,8 @@ pre code { color: #098658; }
     .token.keyword { color: #569CD6; }
     .token.id { color: #d4d4d4; }
     .token.comment { color: #6A9955; }
-    .token.string, .token.char { color: #CE9178; }
-    .token.number { color: #B5CEA8; }
-    pre code { color: #B5CEA8; }
+    .token.string { color: #ce9178; }
+    .token.char { color: #d7ba7d; }
+    .token.number { color: #b5cea8; }
+    pre code { color: #b5cea8; }
 }
