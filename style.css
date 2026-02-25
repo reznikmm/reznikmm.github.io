@@ -158,21 +158,21 @@ code[class*="language-"] {
 }
 
 /* Класи підсвітки */
-.token.keyword { color: #0000ff; font-weight: bold; }   /* procedure, begin, is */
-.token.id { color: #795e26; }                     /* Назви процедур/функцій */
-.token.comment { color: #008000; font-style: italic; }  /* -- comments */
-.token.string, .token.char { color: #a31515; }                       /* "Strings" */
-.token.number { color: #098658; }                       /* 123, 16#FF# */
-pre code { color: #a52a2a; }                     /* :=, =>, +, & */
+.token.keyword { color: #0000ff; }
+.token.id { color: #000000; }
+.token.comment { color: #008000; font-style: italic; }
+.token.string, .token.char { color: #a31515; }
+.token.number { color: #098658; }
+pre code { color: #098658; }
 
 /* Темна тема */
 @media (prefers-color-scheme: dark) {
     pre { border-color: rgba(255, 255, 255, 0.1); }
 
-    .token.keyword { color: #569cd6; }   /* Світло-синій */
-    .token.id { color: #dcdcaa; }  /* Жовтуватий */
-    .token.comment { color: #6a9955; }   /* М'який зелений */
-    .token.string, .token.char { color: #ce9178; }    /* Теплий помаранчевий */
-    .token.number { color: #b5cea8; }    /* Салатовий */
-    pre code { color: #d4d4d4; }  /* Світло-сірий */
+    .token.keyword { color: #569CD6; }
+    .token.id { color: #d4d4d4; }
+    .token.comment { color: #6A9955; }
+    .token.string, .token.char { color: #CE9178; }
+    .token.number { color: #B5CEA8; }
+    pre code { color: #B5CEA8; }
 }
