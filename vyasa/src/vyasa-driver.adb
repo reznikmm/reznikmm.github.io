@@ -144,6 +144,7 @@ begin
            Text.Split_Lines;
       begin
          Read_Front_Matter (Lines, Front);
+         Parser.Set_Extensions ((Link_Attributes => True));
 
          for Line of Lines loop
             Parser.Parse_Line (Line);
