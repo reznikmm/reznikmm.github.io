@@ -3,6 +3,9 @@
 --  SPDX-License-Identifier: MIT
 ----------------------------------------------------------------
 
+with Ada.Calendar;
+with Ada.Calendar.Formatting;
+
 with Markdown.Blocks.ATX_Headings;
 with Markdown.Documents;
 with Markdown.Inlines;
@@ -10,24 +13,17 @@ with Markdown.Parsers;
 
 with VSS.Characters;
 with VSS.Command_Line;
-with VSS.HTML.Writers;
 with VSS.String_Vectors;
 with VSS.Strings;
+with VSS.Strings.Conversions;
 with VSS.Text_Streams.File_Input;
-with VSS.Text_Streams.File_Output;
-with VSS.XML.Dummy_Locators;
-with VSS.XML.Templates.Processors;
-with VSS.XML.Templates.Proxies.Event_Vectors;
-with VSS.XML.Templates.Proxies.Strings;
 
-with Vyasa.Content_Handlers;
-with Vyasa.Emitters;
-with Vyasa.Highlighters.Ada;
-with Vyasa.Templates.Index;
+with Vyasa.Atom;
+with Vyasa.Posts;
 
 procedure Vyasa.Driver is
 
-   Template : constant VSS.Command_Line.Value_Option :=
+   Input_File : constant VSS.Command_Line.Value_Option :=
      (Short_Name  => "i",
       Long_Name   => "input",
       Description => "Input Markdown file name",
@@ -38,6 +34,18 @@ procedure Vyasa.Driver is
       Long_Name   => "output-file",
       Description => "Output HTML file name",
       Value_Name  => "file");
+
+   Atom_Output : constant VSS.Command_Line.Value_Option :=
+     (Short_Name  => "a",
+      Long_Name   => "atom-output",
+      Description => "Output Atom feed file name",
+      Value_Name  => "file");
+
+   Base_URL_Option : constant VSS.Command_Line.Value_Option :=
+     (Short_Name  => "b",
+      Long_Name   => "base-url",
+      Description => "Base URL for the Atom feed",
+      Value_Name  => "url");
 
    function Trim
      (Text : VSS.Strings.Virtual_String)
@@ -107,23 +115,19 @@ procedure Vyasa.Driver is
       return Result;
    end To_String;
 
-   Locator : aliased VSS.XML.Dummy_Locators.SAX_Locator;
-
-   Filter : aliased VSS.XML.Templates.Processors.XML_Template_Processor;
-   Writer : aliased VSS.HTML.Writers.HTML5_Writer;
    Input  : aliased VSS.Text_Streams.File_Input.File_Input_Text_Stream;
-   Output : aliased VSS.Text_Streams.File_Output.File_Output_Text_Stream;
-
    Parser : Markdown.Parsers.Markdown_Parser;
    Front  : Front_Matter;
 begin
+   VSS.Command_Line.Add_Option (Input_File);
    VSS.Command_Line.Add_Option (Output_File);
-   VSS.Command_Line.Add_Option (Template);
+   VSS.Command_Line.Add_Option (Atom_Output);
+   VSS.Command_Line.Add_Option (Base_URL_Option);
    VSS.Command_Line.Add_Help_Option;
 
    VSS.Command_Line.Process;
 
-   VSS.Text_Streams.File_Input.Open (Input, Template.Value);
+   VSS.Text_Streams.File_Input.Open (Input, Input_File.Value);
 
    declare
       Text : VSS.Strings.Virtual_String;
@@ -152,43 +156,30 @@ begin
       end;
    end;
 
-   Output.Create (Output_File.Value);
-   Writer.Set_Output_Stream (Output'Unchecked_Access);
-   Filter.Set_Content_Handler (Writer'Unchecked_Access);
-   Filter.Set_Document_Locator (Locator'Unchecked_Access);
-
    declare
-      Ok : Boolean := True;
       Document : constant Markdown.Documents.Document := Parser.Document;
-
-      Content : constant VSS.XML.Templates.Proxies.Event_Vectors
-        .Event_Vector_Proxy_Access :=
-          new VSS.XML.Templates.Proxies.Event_Vectors.Event_Vector_Proxy;
-
-      Sink : Vyasa.Content_Handlers.SAX_Content_Handler :=
-          (Value => Content.Value'Unchecked_Access);
-
-      Title_Proxy : constant VSS.XML.Templates.Proxies.Proxy_Access :=
-        new VSS.XML.Templates.Proxies.Strings.Virtual_String_Proxy'
-          (Text => Get_Title (Document));
-
-      Date_Proxy : constant VSS.XML.Templates.Proxies.Proxy_Access :=
-        new VSS.XML.Templates.Proxies.Strings.Virtual_String_Proxy'
-          (Text => Front.Date);
-
-      Emitter : Vyasa.Emitters.Emitter;
-      Ada_HL  : aliased Vyasa.Highlighters.Ada.Ada_Highlighter;
    begin
-      Ada_HL.Initialize;
-      Emitter.Register_Highlighter ("ada", Ada_HL'Unchecked_Access);
-      Emitter.Emit_Blocks (Sink, Document, False);
+      if VSS.Command_Line.Is_Specified (Output_File) then
+         Vyasa.Posts.Generate
+           (Document    => Document,
+            Output_File => Output_File.Value,
+            Title       => Get_Title (Document),
+            Date        => Front.Date);
+      end if;
 
-      Filter.Bind
-        ("content", VSS.XML.Templates.Proxies.Proxy_Access (Content));
-
-      Filter.Bind ("title", Title_Proxy);
-      Filter.Bind ("date", Date_Proxy);
-
-      Vyasa.Templates.Index (Filter, Ok);
+      if VSS.Command_Line.Is_Specified (Atom_Output) then
+         declare
+            Updated : constant VSS.Strings.Virtual_String :=
+              VSS.Strings.Conversions.To_Virtual_String
+                (Ada.Calendar.Formatting.Image (Ada.Calendar.Clock)(1 .. 10)
+                 & "T00:00:00Z");
+         begin
+            Vyasa.Atom.Generate
+              (Document    => Document,
+               Output_File => Atom_Output.Value,
+               Base_URL    => Base_URL_Option.Value,
+               Updated     => Updated);
+         end;
+      end if;
    end;
 end Vyasa.Driver;
